@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entertainment Ticker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: transparent;
+            overflow: hidden;
+        }
+
+        .ticker-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.95);
+            border-top: 4px solid #d4af37;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .ticker-header {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            color: white;
+            padding: 0 30px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-width: 300px;
+            border-right: 3px solid #d4af37;
+            position: relative;
+        }
+
+        .ticker-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .channel-name {
+            color: #87CEEB;
+            font-size: 28px;
+            font-weight: 900;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(135, 206, 235, 0.5);
+        }
+
+        .live-text {
+            color: #ff4444;
+            font-weight: bold;
+            font-size: 14px;
+            text-shadow: 0 0 15px rgba(255, 68, 68, 0.7);
+            animation: pulse 2s infinite;
+            text-align: center;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .ticker-content {
+            flex: 1;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(90deg, #1a1a1a, #2a2a2a, #1a1a1a);
+        }
+
+        .ticker-scroll {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            animation: scroll 90s linear infinite;
+            white-space: nowrap;
+            will-change: transform;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-200%); }
+        }
+
+        .ticker-item {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 50px;
+            font-size: 18px;
+            color: white;
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            line-height: 1.2;
+        }
+
+        .badge {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 12px;
+            text-transform: uppercase;
+            color: white;
+            text-shadow: none;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.movies {
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            box-shadow: 0 4px 8px rgba(212, 175, 55, 0.4);
+        }
+
+        .badge.tv {
+            background: linear-gradient(135deg, #ff4444, #cc3333);
+            box-shadow: 0 4px 8px rgba(255, 68, 68, 0.4);
+        }
+
+        .badge.music {
+            background: linear-gradient(135deg, #8b00ff, #6600cc);
+            box-shadow: 0 4px 8px rgba(139, 0, 255, 0.4);
+        }
+
+        .badge.celebrity {
+            background: linear-gradient(135deg, #ff69b4, #cc4190);
+            box-shadow: 0 4px 8px rgba(255, 105, 180, 0.4);
+        }
+
+        .badge.breaking {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            animation: flash 1s infinite;
+            box-shadow: 0 4px 8px rgba(255, 0, 0, 0.6);
+        }
+
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .separator {
+            color: #d4af37;
+            margin: 0 20px;
+            font-size: 20px;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .trending {
+            color: #ff69b4;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+        }
+
+        .box-office {
+            color: #d4af37;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .award-season {
+            color: #ff4444;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+        }
+
+        .ticker-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { opacity: 0.5; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .ticker-container {
+                height: 80px;
+            }
+            
+            .ticker-header {
+                min-width: 250px;
+                padding: 0 20px;
+            }
+            
+            .live-text {
+                font-size: 12px;
+            }
+            
+            .channel-name {
+                font-size: 22px;
+            }
+            
+            .ticker-item {
+                font-size: 16px;
+            }
+            
+            .badge {
+                font-size: 10px;
+                padding: 6px 12px;
+            }
+            
+            .separator {
+                font-size: 18px;
+                margin: 0 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .ticker-container {
+                height: 70px;
+            }
+            
+            .ticker-header {
+                min-width: 200px;
+                padding: 0 15px;
+            }
+            
+            .channel-name {
+                font-size: 18px;
+            }
+            
+            .live-text {
+                font-size: 10px;
+            }
+            
+            .ticker-item {
+                font-size: 14px;
+            }
+            
+            .badge {
+                font-size: 9px;
+                padding: 5px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ticker-container">
+        <div class="ticker-header">
+            <div class="channel-name">LIKED NEWS</div>
+            <div class="live-text">LIVE ENTERTAINMENT</div>
+        </div>
+        <div class="ticker-content">
+            <div class="ticker-scroll" id="tickerScroll">
+                <!-- Content will be dynamically generated -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class EntertainmentNewsScraper {
+            constructor() {
+                    const sources = [
+                    {
+                        name: 'Entertainment Source 1',
+                        url: 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://www.tmz.com/rss.xml'),
+                        type: 'rss_proxy'
+                    },
+                    {
+                        name: 'Entertainment Source 2',
+                        url: 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://www.etonline.com/rss'),
+                        type: 'rss_proxy'
+                    },
+                    {
+                        name: 'Entertainment Source 3',
+                        url: 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://people.com/rss'),
+                        type: 'rss_proxy'
+                    },
+                    {
+                        name: 'Entertainment Source 4',
+                        url: 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://www.usmagazine.com/feed/'),
+                        type: 'rss_proxy'
+                    },
+                    {
+                        name: 'Entertainment Source 5',
+                        url: 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://variety.com/c/news/feed/'),
+                        type: 'rss_proxy'
+                    },
+                    {
+                        name: 'Entertainment Source 6',
+                        url: 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://www.hollywoodreporter.com/c/news/feed/'),
+                        type: 'rss_proxy'
+                    }
+                ];
+                this.newsCache = new Map();
+                this.lastFetch = 0;
+                this.fetchInterval = 240000; // 4 minutes
+            }
+
+            async fetchRSSSource(source) {
+                try {
+                    console.log(`🔍 Fetching from ${source.name}...`);
+                    
+                    const response = await fetch(source.url);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    
+                    const data = await response.json();
+                    const rssContent = data.contents;
+                    
+                    if (!rssContent) {
+                        console.log(`❌ No content from ${source.name}`);
+                        return [];
+                    }
+
+                    // Parse RSS XML content
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(rssContent, 'text/xml');
+                    
+                    // Check for parsing errors
+                    const parseError = xmlDoc.querySelector('parsererror');
+                    if (parseError) {
+                        console.log(`❌ XML parsing error for ${source.name}:`, parseError.textContent);
+                        return [];
+                    }
+
+                    const items = xmlDoc.querySelectorAll('item');
+                    const news = [];
+
+                    items.forEach((item, index) => {
+                        if (index >= 15) return; // Limit items per source
+
+                        const title = item.querySelector('title')?.textContent?.trim();
+                        const link = item.querySelector('link')?.textContent?.trim();
+                        const pubDate = item.querySelector('pubDate')?.textContent?.trim();
+                        const description = item.querySelector('description')?.textContent?.trim();
+
+                        if (title && this.isValidNews(title, description)) {
+                            news.push({
+                                title: this.cleanTitle(title),
+                                link: link,
+                                pubDate: pubDate ? new Date(pubDate) : new Date(),
+                                source: source.name,
+                                category: this.categorizeNews(title.toLowerCase()),
+                                description: description
+                            });
+                        }
+                    });
+
+                    console.log(`✅ ${source.name}: Found ${news.length} valid stories`);
+                    return news;
+
+                } catch (error) {
+                    console.log(`❌ Error fetching ${source.name}:`, error.message);
+                    return [];
+                }
+            }
+
+            isValidNews(title, description = '') {
+                const content = (title + ' ' + description).toLowerCase();
+                
+                // Must be substantial length
+                if (title.length < 20) return false;
+                
+                // Filter out obvious spam/junk
+                const spamKeywords = [
+                    'sponsored', 'advertisement', 'ad:', 'promo:', 'contest',
+                    'giveaway', 'click here', 'subscribe', 'newsletter'
+                ];
+                
+                if (spamKeywords.some(spam => content.includes(spam))) return false;
+                
+                // Must have celebrity substance - names or specific content
+                const hasSubstance = this.hasEntertainmentSubstance(title);
+                if (!hasSubstance) return false;
+                
+                // Must be newsworthy
+                const newsKeywords = [
+                    // Legal/Criminal
+                    'arrested', 'charged', 'lawsuit', 'sued', 'court', 'trial', 'verdict', 'guilty', 'sentenced',
+                    
+                    // Career/Business
+                    'fired', 'hired', 'quits', 'retires', 'signs', 'deal', 'contract', 'announces', 'confirms',
+                    
+                    // Personal Life
+                    'married', 'divorce', 'engaged', 'dating', 'breakup', 'pregnant', 'baby', 'dies', 'death',
+                    
+                    // Entertainment Industry
+                    'album', 'tour', 'concert', 'movie', 'film', 'show', 'series', 'premiere', 'release',
+                    'award', 'wins', 'nominated', 'grammy', 'oscar', 'emmy', 'golden globe',
+                    
+                    // Controversy/News
+                    'scandal', 'controversy', 'apologizes', 'responds', 'statement', 'reveals', 'admits',
+                    'hospitalized', 'health', 'rehab', 'treatment'
+                ];
+                
+                return newsKeywords.some(keyword => content.includes(keyword));
+            }
+
+            hasEntertainmentSubstance(title) {
+                // Check for celebrity names (First Last pattern)
+                const namePattern = /\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/;
+                if (namePattern.test(title)) return true;
+                
+                // Check for quoted titles (songs, movies, shows)
+                if (title.includes("'") || title.includes('"')) return true;
+                
+                // Check for known celebrity single names
+                const celebNames = [
+                    'beyonce', 'madonna', 'cher', 'adele', 'drake', 'eminem', 'rihanna',
+                    'kanye', 'kardashian', 'jenner', 'swift', 'bieber', 'ariana', 'selena'
+                ];
+                
+                const titleLower = title.toLowerCase();
+                if (celebNames.some(name => titleLower.includes(name))) return true;
+                
+                // Check for entertainment brands/shows
+                const entertainmentBrands = [
+                    'netflix', 'disney', 'marvel', 'hbo', 'spotify', 'apple music',
+                    'american idol', 'the voice', 'saturday night live', 'tonight show'
+                ];
+                
+                return entertainmentBrands.some(brand => titleLower.includes(brand));
+            }
+
+            cleanTitle(title) {
+                return title
+                    .replace(/^\[.*?\]\s*/, '') // Remove [tags]
+                    .replace(/\s+/g, ' ')       // Normalize whitespace
+                    .replace(/&amp;/g, '&')    // Fix HTML entities
+                    .replace(/&quot;/g, '"')
+                    .replace(/&apos;/g, "'")
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .trim()
+                    .substring(0, 140);         // Limit length for ticker
+            }
+
+            categorizeNews(title) {
+                if (title.includes('music') || title.includes('album') || title.includes('song') || 
+                    title.includes('concert') || title.includes('tour') || title.includes('spotify') || 
+                    title.includes('billboard') || title.includes('grammy')) {
+                    return 'music';
+                } else if (title.includes('movie') || title.includes('film') || title.includes('cinema') || 
+                           title.includes('box office') || title.includes('oscar') || title.includes('director')) {
+                    return 'movies';
+                } else if (title.includes('tv') || title.includes('television') || title.includes('series') || 
+                           title.includes('show') || title.includes('netflix') || title.includes('streaming') ||
+                           title.includes('emmy')) {
+                    return 'tv';
+                } else {
+                    return 'celebrity';
+                }
+            }
+
+            async fetchAllNews() {
+                const now = Date.now();
+                
+                // Check if we should fetch (respect rate limiting)
+                if (now - this.lastFetch < this.fetchInterval && this.newsCache.size > 0) {
+                    console.log('⏰ Using cached entertainment news (rate limiting)');
+                    return Array.from(this.newsCache.values()).flat();
+                }
+
+                console.log('🎬 Fetching REAL entertainment news from major outlets...');
+                
+                try {
+                    // Fetch from all sources with timeout
+                    const fetchPromises = this.sources.map(async (source) => {
+                        try {
+                            const timeoutPromise = new Promise((_, reject) => 
+                                setTimeout(() => reject(new Error('Timeout')), 10000)
+                            );
+                            
+                            const fetchPromise = this.fetchRSSSource(source);
+                            
+                            return await Promise.race([fetchPromise, timeoutPromise]);
+                        } catch (error) {
+                            console.log(`⚠️ ${source.name} failed:`, error.message);
+                            return [];
+                        }
+                    });
+
+                    const sourceResults = await Promise.all(fetchPromises);
+                    
+                    // Combine all results
+                    const allNews = sourceResults.flat();
+                    
+                    // Remove duplicates and sort by recency
+                    const uniqueNews = this.removeDuplicates(allNews);
+                    const sortedNews = uniqueNews
+                        .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
+                        .slice(0, 20);
+
+                    // Update cache
+                    this.newsCache.clear();
+                    sourceResults.forEach((result, index) => {
+                        this.newsCache.set(this.sources[index].name, result);
+                    });
+                    this.lastFetch = now;
+
+                    console.log(`✅ Entertainment News Scraper: Found ${sortedNews.length} quality stories`);
+                    
+                    // Log source breakdown
+                    const breakdown = {};
+                    sourceResults.forEach((result, index) => {
+                        breakdown[this.sources[index].name.split(' ')[0]] = result.length;
+                    });
+                    console.log('📊 Source breakdown:', breakdown);
+
+                    // Show top stories
+                    if (sortedNews.length > 0) {
+                        console.log('🔥 Top entertainment stories:');
+                        sortedNews.slice(0, 5).forEach((item, index) => {
+                            const timeAgo = this.getTimeAgo(item.pubDate);
+                            console.log(`${index + 1}. [${item.category.toUpperCase()}] ${item.title} (${timeAgo})`);
+                        });
+                    } else {
+                        console.log('❌ No valid entertainment news found from any source');
+                    }
+
+                    return sortedNews;
+
+                } catch (error) {
+                    console.error('❌ Entertainment News Scraper error:', error);
+                    return [];
+                }
+            }
+
+            removeDuplicates(newsArray) {
+                const seen = new Set();
+                return newsArray.filter(item => {
+                    // Create a normalized version for duplicate detection
+                    const normalized = item.title.toLowerCase()
+                        .replace(/[^\w\s]/g, '')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                    
+                    const firstWords = normalized.split(' ').slice(0, 6).join(' ');
+                    
+                    if (seen.has(firstWords)) {
+                        return false;
+                    }
+                    seen.add(firstWords);
+                    return true;
+                });
+            }
+
+            getTimeAgo(date) {
+                const now = new Date();
+                const diffInHours = Math.floor((now - new Date(date)) / (1000 * 60 * 60));
+                
+                if (diffInHours < 1) return 'Just now';
+                if (diffInHours < 24) return `${diffInHours}h ago`;
+                
+                const diffInDays = Math.floor(diffInHours / 24);
+                return `${diffInDays}d ago`;
+            }
+
+            isRecent(date) {
+                const now = new Date();
+                const diffHours = (now - new Date(date)) / (1000 * 60 * 60);
+                return diffHours < 8; // Consider 8 hours as "breaking"
+            }
+        }
+
+        class EntertainmentTicker {
+            constructor() {
+                this.tickerScroll = document.getElementById('tickerScroll');
+                this.currentContent = [];
+                this.isAwardSeason = this.checkAwardSeason();
+                this.newsCache = new Map();
+                this.lastFetch = 0;
+                this.fetchInterval = 180000; // 3 minutes
+                this.celebAgent = new EntertainmentNewsScraper();
+                
+                this.init();
+            }
+
+            checkAwardSeason() {
+                const now = new Date();
+                const month = now.getMonth() + 1;
+                return (month >= 1 && month <= 3) || month === 9;
+            }
+
+            cleanTitle(title) {
+                return title
+                    .replace(/^.*? - /, '')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .substring(0, 120);
+            }
+
+            categorizeNews(title) {
+                if (title.includes('movie') || title.includes('film') || title.includes('box office') || title.includes('cinema') || title.includes('weekend') || title.includes('million') || title.includes('$')) {
+                    return 'movies';
+                } else if (title.includes('tv') || title.includes('television') || title.includes('series') || title.includes('show')) {
+                    return 'tv';
+                } else if (title.includes('music') || title.includes('album') || title.includes('song') || title.includes('concert') || title.includes('tour') || title.includes('spotify') || title.includes('chart')) {
+                    return 'music';
+                } else {
+                    return 'celebrity';
+                }
+            }
+
+            async fetchAllNews() {
+                const now = Date.now();
+                
+                if (now - this.lastFetch < this.fetchInterval && this.currentContent.length > 0) {
+                    return;
+                }
+
+                console.log('🎬 Fetching REAL entertainment news from major outlets...');
+                
+                try {
+                    const entertainmentNews = await this.celebAgent.fetchAllNews();
+                    
+                    console.log('📥 Raw entertainment news items fetched:', entertainmentNews.length);
+                    
+                    if (entertainmentNews.length > 0) {
+                        // Always use real news when available, no matter how few
+                        this.currentContent = entertainmentNews.map(item => ({
+                            badge: item.category,
+                            type: this.celebAgent.isRecent(item.pubDate) ? 'breaking' : 'normal',
+                            text: item.title
+                        }));
+                        
+                        console.log('✅ SUCCESS: Using REAL entertainment news from major outlets!');
+                        console.log('🎯 TICKER CONTENT UPDATED with', this.currentContent.length, 'real stories');
+                        console.log('🌟 Real news stories:');
+                        this.currentContent.forEach((item, index) => {
+                            console.log(`   ${index + 1}. [${item.badge.toUpperCase()}] ${item.text}`);
+                        });
+                        
+                        this.lastFetch = now;
+                        console.log(`🔄 RENDERING TICKER with ${this.currentContent.length} REAL news items`);
+                        this.renderContent();
+                        
+                    } else {
+                        console.log('⏳ No real news fetched yet - keeping previous content until next update');
+                        // Don't update content if no real news - keep whatever we had before
+                        if (this.currentContent.length === 0) {
+                            console.log('📺 No previous content exists - showing loading message');
+                            this.currentContent = [
+                                { badge: 'celebrity', type: 'normal', text: 'Loading real entertainment news from major outlets...' },
+                                { badge: 'tv', type: 'normal', text: 'Fetching latest celebrity updates and breaking entertainment news...' },
+                                { badge: 'music', type: 'normal', text: 'Connecting to entertainment news sources for live updates...' }
+                            ];
+                            this.renderContent();
+                        }
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error in fetchAllNews:', error);
+                    console.log('⏳ Keeping current content - will retry on next update cycle');
+                    // Don't change content on error - keep what we have
+                }
+            }
+
+            isRecent(pubDate) {
+                const now = new Date();
+                const diffHours = (now - pubDate) / (1000 * 60 * 60);
+                return diffHours < 2;
+            }
+
+            getFallbackContent() {
+                return [
+                    { badge: 'celebrity', type: 'breaking', text: 'BREAKING: Hollywood A-lister announces surprise engagement' },
+                    { badge: 'tv', type: 'normal', text: 'Netflix announces three new original series for 2025' },
+                    { badge: 'music', type: 'normal', text: 'Music industry reports record streaming numbers for Q2 2025' },
+                    { badge: 'celebrity', type: 'trending', text: 'Social media buzz: Celebrity couple spotted at exclusive LA restaurant' },
+                    { badge: 'tv', type: 'breaking', text: 'BREAKING: Popular TV series renewed for two additional seasons' },
+                    { badge: 'celebrity', type: 'normal', text: 'Red carpet fashion: Designer reveals A-list clientele for awards season' },
+                    { badge: 'music', type: 'trending', text: 'Grammy winner announces surprise album drop via social media' },
+                    { badge: 'tv', type: 'normal', text: 'Streaming giant invests $2B in original content production' },
+                    { badge: 'celebrity', type: 'normal', text: 'Celebrity philanthropist launches new charitable foundation' },
+                    { badge: 'music', type: 'normal', text: 'Concert tour announcement: Multi-platinum artist plans 50-city tour' },
+                    { badge: 'celebrity', type: 'trending', text: 'Entertainment tonight: Star-studded premiere draws massive crowds' },
+                    { badge: 'tv', type: 'normal', text: 'Emmy nominations announced with record-breaking diversity' },
+                    { badge: 'music', type: 'trending', text: 'Billboard charts see major shake-up with new releases' },
+                    { badge: 'celebrity', type: 'normal', text: 'Fashion Week highlights celebrity designer collaborations' },
+                    { badge: 'tv', type: 'breaking', text: 'BREAKING: Streaming wars heat up with exclusive content deals' }
+                ];
+            }
+
+            renderContent() {
+                console.log('🎨 RENDERING TICKER with content:', this.currentContent.length, 'items');
+                
+                if (this.currentContent.length === 0) {
+                    console.log('❌ No content to render!');
+                    return;
+                }
+
+                const items = this.currentContent.map((item, index) => {
+                    const badgeClass = item.badge;
+                    const textClass = item.type === 'breaking' ? 'breaking' : 
+                                    item.type === 'trending' ? 'trending' : 
+                                    item.type === 'box-office' ? 'box-office' :
+                                    item.type === 'award-season' ? 'award-season' : '';
+                    
+                    return `
+                        <div class="ticker-item">
+                            <span class="badge ${badgeClass}">${item.badge}</span>
+                            <span class="${textClass}">${item.text}</span>
+                        </div>
+                        <span class="separator">★</span>
+                    `;
+                }).join('');
+
+                // Triple the content for smooth scrolling
+                this.tickerScroll.innerHTML = items + items + items;
+                
+                // Log what was actually rendered
+                console.log('✅ TICKER RENDERED successfully');
+                console.log('📺 First 3 items in ticker:');
+                this.currentContent.slice(0, 3).forEach((item, index) => {
+                    console.log(`   ${index + 1}. [${item.badge}] ${item.text.substring(0, 60)}...`);
+                });
+                
+                // Force animation restart
+                this.tickerScroll.style.animation = 'none';
+                this.tickerScroll.offsetHeight;
+                this.tickerScroll.style.animation = 'scroll 90s linear infinite';
+                
+                console.log('🎬 Animation restarted - ticker should be showing new content now!');
+            }
+
+            updateContent() {
+                setInterval(async () => {
+                    console.log('🔄 Auto-refresh: Fetching fresh REAL entertainment news...');
+                    console.log('📡 Updating from major entertainment news sources...');
+                    try {
+                        await this.fetchAllNews();
+                        console.log('✅ Auto-refresh complete - ticker updated with latest real news');
+                    } catch (error) {
+                        console.error('❌ Auto-refresh failed, will retry next cycle:', error);
+                    }
+                }, this.fetchInterval); // 3 minutes
+            }
+
+            updateAwardSeason() {
+                setInterval(() => {
+                    this.isAwardSeason = this.checkAwardSeason();
+                }, 86400000);
+            }
+
+            init() {
+                console.log('🚀 Starting REAL-ONLY Entertainment News Ticker');
+                console.log('📡 Will ONLY show real news from major entertainment outlets');
+                console.log('⏳ Loading real entertainment news (no mock data)...');
+                
+                // Start with loading message instead of mock data
+                this.currentContent = [
+                    { badge: 'celebrity', type: 'normal', text: 'Loading real entertainment news from major outlets...' },
+                    { badge: 'tv', type: 'normal', text: 'Fetching latest celebrity updates and breaking entertainment news...' },
+                    { badge: 'music', type: 'normal', text: 'Connecting to entertainment news sources for live updates...' }
+                ];
+                this.renderContent();
+                
+                // Force fetch real news immediately
+                setTimeout(async () => {
+                    console.log('⚡ FETCHING real entertainment news from major outlets...');
+                    console.log('⏳ Scraping multiple entertainment news sources...');
+                    
+                    try {
+                        await this.fetchAllNews();
+                        console.log('✅ Initial real news fetch complete!');
+                    } catch (error) {
+                        console.error('❌ Initial fetch failed, will retry:', error);
+                    }
+                }, 1000);
+                
+                this.updateContent();
+                this.updateAwardSeason();
+                
+                setInterval(() => {
+                    this.restartAnimation();
+                }, 90000);
+            }
+
+            restartAnimation() {
+                this.tickerScroll.style.animation = 'none';
+                this.tickerScroll.offsetHeight;
+                this.tickerScroll.style.animation = 'scroll 90s linear infinite';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.entertainmentTicker = new EntertainmentTicker();
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                const ticker = window.entertainmentTicker;
+                if (ticker) {
+                    ticker.restartAnimation();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
